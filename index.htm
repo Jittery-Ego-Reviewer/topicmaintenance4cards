@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>溝通情景老虎機</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Google Font (Noto Sans TC) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* 使用 Noto Sans TC 作為預設字體 */
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-100 to-indigo-200 min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-5xl bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl p-6 sm:p-10">
+        
+        <!-- 標題 -->
+        <h1 class="text-3xl sm:text-4xl font-bold text-center text-indigo-800 mb-4">
+            溝通情景老虎機
+        </h1>
+        <p class="text-lg text-center text-gray-600 mb-8 sm:mb-10">
+            按下「開始」按鈕，隨機抽取一個溝通情景進行練習！
+        </p>
+
+        <!-- 老虎機卡片區域 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            
+            <!-- 卡片 1: 交談目的卡 -->
+            <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-5 text-center shadow-md">
+                <h2 class="text-xl font-semibold text-blue-800 mb-4">交談目的卡</h2>
+                <div id="slot-goal" class="h-24 flex items-center justify-center bg-white rounded-md text-2xl font-bold text-gray-800 p-4 overflow-hidden">
+                    ???
+                </div>
+            </div>
+
+            <!-- 卡片 2: 場合卡 -->
+            <div class="bg-green-50 border-2 border-green-200 rounded-lg p-5 text-center shadow-md">
+                <h2 class="text-xl font-semibold text-green-800 mb-4">場合卡</h2>
+                <div id="slot-occasion" class="h-24 flex items-center justify-center bg-white rounded-md text-2xl font-bold text-gray-800 p-4 overflow-hidden">
+                    ???
+                </div>
+            </div>
+
+            <!-- 卡片 3: 對象卡 -->
+            <div class="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-5 text-center shadow-md">
+                <h2 class="text-xl font-semibold text-yellow-800 mb-4">對象卡</h2>
+                <div id="slot-target" class="h-24 flex items-center justify-center bg-white rounded-md text-2xl font-bold text-gray-800 p-4 overflow-hidden">
+                    ???
+                </div>
+            </div>
+
+            <!-- 卡片 4: 話題卡 -->
+            <div class="bg-red-50 border-2 border-red-200 rounded-lg p-5 text-center shadow-md">
+                <h2 class="text-xl font-semibold text-red-800 mb-4">話題卡</h2>
+                <div id="slot-topic" class="h-24 flex items-center justify-center bg-white rounded-md text-2xl font-bold text-gray-800 p-4 overflow-hidden">
+                    ???
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 按鈕 -->
+        <div class="text-center mt-10">
+            <button id="spin-button" class="w-full sm:w-auto text-2xl font-bold py-4 px-12 bg-indigo-600 text-white rounded-lg shadow-lg transition-all duration-300 ease-in-out
+                                           hover:bg-indigo-700 hover:shadow-xl
+                                           active:scale-95
+                                           focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2
+                                           disabled:bg-gray-400 disabled:cursor-not-allowed">
+                開始
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 卡片資料 ---
+        const data = {
+            goals: ['交流興趣', '尋求資料', '尋求協助', '分享資訊', '尋求允許', '表達意見', '示意友好', '分享感受', '尋求共識', '表達支持'],
+            occasions: ['巴士站', '餐廳', '課室', '禮堂', '走廊'],
+            targets: ['同學', '好朋友', '老師', '姑娘', '媽媽', '爸爸', '網友'],
+            topics: ['試後活動', '溫書進度', '打機', '睇書', '歌', '電影', '電視劇', '嗜好', '體育活動', '夢想', '旅行', '地方']
+        };
+
+        // --- DOM 元素 ---
+        const spinButton = document.getElementById('spin-button');
+        const reels = [
+            { el: document.getElementById('slot-goal'), data: data.goals },
+            { el: document.getElementById('slot-occasion'), data: data.occasions },
+            { el: document.getElementById('slot-target'), data: data.targets },
+            { el: document.getElementById('slot-topic'), data: data.topics }
+        ];
+
+        // --- 輔助函數：從陣列中獲取隨機一項 ---
+        function getRandomItem(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        // --- 轉動邏輯 ---
+        function spin() {
+            // 1. 禁用按鈕
+            spinButton.disabled = true;
+            spinButton.textContent = '轉動中...';
+
+            let spinIntervals = []; // 存放每個 reel 的 interval ID
+            let finalResults = []; // 存放最終結果
+
+            // 2. 讓每個 reel 開始轉動
+            reels.forEach((reel, index) => {
+                // 立即顯示一個隨機項目，開始轉動
+                reel.el.textContent = getRandomItem(reel.data);
+                
+                // 設定一個 interval，快速切換文字，模擬轉動效果
+                spinIntervals[index] = setInterval(() => {
+                    reel.el.textContent = getRandomItem(reel.data);
+                }, 80); // 每 80 毫秒切換一次
+
+                // 3. 設定一個延遲，逐一停止每個 reel
+                setTimeout(() => {
+                    clearInterval(spinIntervals[index]); // 停止這個 reel 的轉動
+
+                    // 獲取並顯示最終結果
+                    const finalResult = getRandomItem(reel.data);
+                    reel.el.textContent = finalResult;
+                    finalResults[index] = finalResult;
+
+                    // 4. 檢查是否為最後一個 reel
+                    if (index === reels.length - 1) {
+                        // 所有 reel 都已停止，重新啟用按鈕
+                        spinButton.disabled = false;
+                        spinButton.textContent = '再次開始';
+                    }
+                }, 1000 + (index * 500)); // 每個 reel 的停止時間間隔 0.5 秒
+            });
+        }
+
+        // --- 綁定按鈕事件 ---
+        spinButton.addEventListener('click', spin);
+
+    </script>
+
+</body>
+</html>
